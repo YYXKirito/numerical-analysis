@@ -46,10 +46,16 @@ template<typename T>class Matrix{
 		return *this;
 	}
 	
-	void swapline(int i,int j){
-		int t;
-		for (int k=1; k<=M; ++k){
+	void swapline(int i,int j,int st=1,int ed=MAX_SIZE){
+		T t;
+		for (int k=st; k<=ed; ++k){
 			t=bit[i][k]; bit[i][k]=bit[j][k]; bit[j][k]=t;
+		}
+	}
+	void swapcol(int i,int j,int st=1,int ed=MAX_SIZE){
+		T t;
+		for (int k=st; k<=ed; ++k){
+			t=bit[k][i]; bit[k][i]=bit[k][j]; bit[k][j]=t;
 		}
 	}
 	void print(){

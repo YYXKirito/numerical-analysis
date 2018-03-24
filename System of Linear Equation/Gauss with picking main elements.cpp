@@ -6,18 +6,9 @@
 using namespace std;
 const int N_SIZE=100+10;
 const double eps=1e-5;
-Matrix<double> A;int N;double p[N_SIZE][N_SIZE];
+Matrix<double> A;int N;
 double sqr(double x){ return x*x; }
-void MakeEquation(){
-	A=Matrix<double>(N,N+1);
-	for (int i=1; i<=N; ++i){
-		for (int j=1; j<=N; ++j){
-			A[i][N+1]+=sqr(p[N+1][j])-sqr(p[i][j]);
-			A[i][j]=p[N+1][j]-p[i][j];
-		}
-		A[i][N+1]/=2;
-	}
-}
+void MakeEquation(){}
 void Gauss(){
 	for (int i=1; i<=N-1; ++i){
 		if (abs(A[i][i])<eps) break;
