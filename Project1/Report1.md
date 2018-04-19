@@ -312,4 +312,6 @@ int main(){
  ```    
  ___
  ## 结果
- 
+ ![avatar](https://raw.githubusercontent.com/YYXKirito/numerical-analysis/master/Project1/result.png)
+ ___
+ ## 算法分析
