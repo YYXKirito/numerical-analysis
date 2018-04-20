@@ -26,8 +26,14 @@ ___
 &emsp;&emsp;2. $A$的零元素不储存  
 &emsp;&emsp;3. 显示至少12位有效数字
 </font>
-___
+<div STYLE="page-break-after: always;"></div>
 ## 算法设计
+### 0.带状矩阵的储存方法
+<font size=4>
+&emsp;&emsp;由于$A$为$r=s=2$的带状矩阵，因此我们可以设置$m(=r+s+1)$行$n$列的矩阵矩阵$C$，令
+$$c_{i-j+s+1,j}=a_{ij}$$
+即可将$A$中不为$0$的元素储存下来。
+</font>
 ### 1.需要使用的算法
 #### 1.1 幂法
 <font size=4>
@@ -94,7 +100,7 @@ x_n=y_n/u_{nn} \\
 x_i=(y_i-\sum_{j=i+1}^n u_{ij}x_j)/u_{ii} \ \ (i=n-1,n-2,\cdots,1)
 \end{cases}
 $$  
-#### 1.4带原点平移的幂法和反幂法
+#### 1.4带原点位移的幂法和反幂法
 &emsp;&emsp;若$\lambda$是$A$的特征值，则$\lambda-p$是矩阵$A-pI$的特征值，其中$I$是单位矩阵；反之也成立，即
 $$Ax=\lambda x，（A-pI）x=(\lambda - p)x$$
 可互为因果。其中$p$称为原点位移。  
@@ -123,7 +129,7 @@ $$cond(A)_2 = |\frac{\lambda_1}{\lambda_n}|$$
 $$A=LU \Longrightarrow det A = det L \ det U$$
 &emsp;&emsp;而$L$的对角线上都为$1$，所以有
 $$det A = \prod_{i=1}^{501}u_{ii}$$  
-___
+<div STYLE="page-break-after: always;"></div>
 ## Source Code
  ```c++
 #include<cmath>
@@ -139,9 +145,7 @@ using namespace std;
 /*如果define NORM_2则使用2范数，如果define NORM_INF则使用无穷范数*/
 const int N=501,N_MAX=501+10,inf=~0u>>1,r=2,s=2;
 const double eps=1e-15,b=0.16,c=-0.064;
-
 double lambda[N_MAX],C[r+s+1+10][N_MAX],Doo[r+s+1+10][N_MAX],lambda1,lambda501,lambda_s,det,cond;
-
 inline int sgn(double x){
 	if (x>eps) return 1;
 	if (x<-eps) return -1;
@@ -153,7 +157,6 @@ inline double Matrix(int i,int j,double p=0){
 	if (i==j) return C[i-j+s+1][j]-p;
 	return C[i-j+s+1][j];
 }//计算矩阵元素的值
-
 void Init(){
 	memset(C,0,sizeof(C));
 	for (int i=1; i<=N; ++i)
@@ -195,7 +198,6 @@ double PowerMethod(double p=0){
 	}
 }//位移为p，使用2范数的幂法（默认位移为0）
 #endif
-
 #ifdef NORM_INF
 double PowerMethod(double p=0){
 	double u[N_MAX],y[N_MAX],beta=0;
@@ -300,7 +302,8 @@ int main(){
 	cond=fabs(lambda1/lambda_s);
 	if (lambda1>lambda501) swap(lambda1,lambda501);
     //用%.12E控制输出格式为科学计数法，且保留小数点后12位（此时有效数字至少为13位）
-	printf("lambda_1=%.12E lambda_501=%.12E lambda_s=%.12E\n", lambda1, lambda501, lambda_s);
+	printf("lambda_1=%.12E lambda_501=%.12E lambda_s=%.12E\n"
+    , lambda1, lambda501, lambda_s);
 	for (int i=1; i<=39; ++i){
 		double miu=lambda1+i*(lambda501-lambda1)/40;
 		DoolittleInit(miu);
@@ -310,8 +313,23 @@ int main(){
 	
 	return 0;
  ```    
- ___
  ## 结果
  ![avatar](https://raw.githubusercontent.com/YYXKirito/numerical-analysis/master/Project1/result.png)
- ___
  ## 算法分析
+### 空间复杂度分析
+&emsp;&emsp;根据本题带状矩阵的特点，我们可以使用特殊的方式储存矩阵，从而减少所占用的空间。储存矩阵所需的空间从$O(n^2)$级别，降到了$O(n)$级别。幂法、反幂法、Doolittle分解法等算法中需要用到的辅助数组所占空间也是$O(n)$级别的，因此我们可以认为算法整体的空间复杂度是$O(n)$
+ ### 幂法、反幂法
+* __优点：__ 思路清晰，编程复杂度低，查错方便  
+* __缺点：__ 算法的收敛性受初始向量$u_o$的影响，对某些特殊的初始迭代向量，若只使用精度控制结果，则算法无法计算出正确结果，此时需要使用精度和迭代次数同时控制结果；同时，存在复特征值的情况难以使用幂法及反幂法解决
+
+### Doolittle分解法
+&emsp;&emsp;根据本题需要多次计算系数矩阵相同，常数向量不同的线性方程组的特点，因此我们选用Doolittle分解法时，系数矩阵$A$的三角分解形式不变，这样能够节省很大一部分的计算量，从而提高程序运行效率；而高斯消去法每次需要重新进行计算，冗余计算过多，因此在此处不使用这个算法  
+### 剪枝
+&emsp;&emsp;考虑到$A$是$r=s=2$的带状矩阵，当$i>j+2$或$i<j-2$时有$a_{ij}=0$，此时跳出循环可节省一部分循环所需的时间。经过测试，加上剪枝后算法运行时间从$14.335s$降至$0.0806s$  
+### 编译优化
+1. 部分类似于$min,max,abs$一类的小函数在程序中被多次用到，在函数前增加关键词$inline$可以部分提高程序运行效率
+2. 编译时打开编译开关$-O2$，可以提高$double$类型的计算效率  
+
+&emsp;&emsp;经过测试，使用编译优化后算法运行时间可以降至$0.464s$  
+##### 测试平台
+&emsp;&emsp;CPU:i7-6700HQ 2.60GHz×8   RAM:7.7GB  OS:Ubuntu 17.10
